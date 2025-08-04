@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <!-- Save New Chat Section -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-plus-circle me-2"></i>
+                    Save New Chat
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('save_chat') }}">
+                    <div class="mb-3">
+                        <label for="chat_title" class="form-label">Chat Title</label>
+                        <input type="text" class="form-control" id="chat_title" name="chat_title" 
+                               placeholder="Enter a title for this chat">
+                        <div class="form-text">Leave empty to auto-generate based on date</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="chat_content" class="form-label">Chat Content</label>
+                        <textarea class="form-control" id="chat_content" name="chat_content" 
+                                  rows="8" placeholder="Paste your chat conversation here..." required></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save me-2"></i>
+                        Save Chat
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Saved Chats Section -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-archive me-2"></i>
+                    Saved Chats ({{ saved_chats|length }})
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if saved_chats %}
+                    <div class="list-group list-group-flush">
+                        {% for chat in saved_chats %}
+                        <div class="list-group-item d-flex justify-content-between align-items-start">
+                            <div class="me-auto">
+                                <div class="fw-bold">{{ chat.title }}</div>
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar3 me-1"></i>
+                                    {{ chat.created_at[:16] }}
+                                </small>
+                            </div>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a href="{{ url_for('view_chat', chat_id=chat.id) }}" 
+                                   class="btn btn-outline-primary" title="View Chat">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <button type="button" class="btn btn-outline-secondary" 
+                                        onclick="copyShareLink('{{ chat.id }}')" title="Copy Share Link">
+                                    <i class="bi bi-share"></i>
+                                </button>
+                                <form method="POST" action="{{ url_for('delete_chat', chat_id=chat.id) }}" 
+                                      class="d-inline" onsubmit="return confirm('Are you sure you want to delete this chat?')">
+                                    <button type="submit" class="btn btn-outline-danger" title="Delete Chat">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-inbox display-4 text-muted"></i>
+                        <p class="text-muted mt-3">No saved chats yet</p>
+                        <p class="text-muted">Save your first chat conversation to get started!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Share Link Modal -->
+<div class="modal fade" id="shareLinkModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-share me-2"></i>
+                    Share Chat Link
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Copy this link to share the chat conversation:</p>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="shareUrl" readonly>
+                    <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard()">
+                        <i class="bi bi-clipboard"></i>
+                    </button>
+                </div>
+                <div class="form-text">This link provides read-only access to the chat conversation.</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
